@@ -5,11 +5,28 @@ export class PassengerService {
     return await Passenger.create(data);
   }
 
-  findAllPassengers() {}
+  async findAllPassengers() {
+    return await Passenger.findAll({
+      where: {
+        status: true,
+      },
+    });
+  }
 
-  findOnePassenger() {}
+  async findOnePassenger(id) {
+    return await Passenger.findOne({
+      where: {
+        id,
+        status: true,
+      },
+    });
+  }
 
-  updatePassenger() {}
+  async updatePassenger(passenger, data) {
+    return await passenger.update(data);
+  }
 
-  deletePassenger() {}
+  async deletePassenger(passenger) {
+    return await passenger.update({ status: false });
+  }
 }
