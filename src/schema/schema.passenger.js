@@ -1,4 +1,5 @@
 import z from "zod";
+import { extraValidationData } from "../common/utils/extractErrorData.js";
 
 export const passengerSchema = z.object({
   nroPassport: z.string().min(4).max(10),
@@ -30,18 +31,18 @@ export function validatePassenger(data) {
   };
 }
 
-export const extraValidationData = (resultValidation) => {
-  let errorMessage;
-  let data;
-  const hasError = !resultValidation.success;
+export function validatePartialPassenger(data) {
+  const result = passengerSchema.partial().safeParse(data);
 
-  if (hasError) errorMessage = JSON.parse(resultValidation.error.message);
-
-  if (!hasError) data = resultValidation.data;
+  const {
+    hasError,
+    errorMessage,
+    data: dataValidate,
+  } = extraValidationData(result);
 
   return {
     hasError,
     errorMessage,
-    data,
+    dataValidate,
   };
-};
+}

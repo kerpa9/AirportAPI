@@ -1,6 +1,9 @@
 import { PassengerService } from "../services/passengers.services.js";
 
-import { validatePassenger } from "../schema/schema.passenger.js";
+import {
+  validatePartialPassenger,
+  validatePassenger,
+} from "../schema/schema.passenger.js";
 
 const passengerService = new PassengerService();
 
@@ -48,9 +51,20 @@ export const findOnePassenger = async (req, res) => {
 };
 
 export const UpdatePassenger = async (req, res) => {
-  const { id } = req.params;
   try {
+    const { hasError, errorMessage, dataValidate } = validatePartialPassenger(
+      req.body
+    );
+
+    if (hasError)
+      return res.status(422).json({
+        status: "error",
+        message: errorMessage,
+      });
+    const { id } = req.params;
+
     const passenger = await passengerService.findOnePassenger(id);
+
     if (!passenger)
       return res.status(404).json({
         status: "Error",
@@ -58,7 +72,7 @@ export const UpdatePassenger = async (req, res) => {
       });
     const updatePassenger = await passengerService.updatePassenger(
       passenger,
-      req.body
+      dataValidate
     );
     return res.status(200).json(updatePassenger);
   } catch (err) {
