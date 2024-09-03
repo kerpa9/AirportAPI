@@ -1,10 +1,22 @@
 import { PassengerService } from "../services/passengers.services.js";
 
+import { validatePassenger } from "../schema/schema.passenger.js";
+
 const passengerService = new PassengerService();
 
 export const CreatePassenger = async (req, res) => {
   try {
-    const passenger = await passengerService.createPassenger(req.body);
+    const { hasError, errorMessage, dataValidate } = validatePassenger(
+      req.body
+    );
+
+    if (hasError)
+      return res.status(422).json({
+        status: "error",
+        message: errorMessage,
+      });
+
+    const passenger = await passengerService.createPassenger(dataValidate);
     return res.status(201).json(passenger);
   } catch (err) {
     return res.status(500).json(err);
