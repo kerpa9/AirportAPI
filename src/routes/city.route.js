@@ -9,6 +9,12 @@ import {
   updateCity,
 } from "../controllers/city.controller.js";
 
+import { validateExistCity } from "../middlewares/city.middlewares.js";
+
 //Roots
 router.route("/city").post(CreateCity).get(findAllCities);
-router.route("/city/:id").get(findOneCity).patch(updateCity).delete(deleteCity);
+router
+  .route("/city/:id")
+  .get(validateExistCity, findOneCity)
+  .patch(updateCity)
+  .delete(deleteCity);

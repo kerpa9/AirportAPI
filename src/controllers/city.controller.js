@@ -29,13 +29,8 @@ export const findAllCities = async (req, res) => {
 };
 export const findOneCity = async (req, res) => {
   try {
-    const { id } = req.params;
-    const city = await cityService.findOneCity(id);
-    if (!city)
-      return res.status(404).json({
-        status: "Error",
-        message: `City with id: ${id} not found`,
-      });
+    const { city } = req;
+    console.log(city);
     return res.status(200).json(city);
   } catch (error) {
     return res.status(500).json(error);
