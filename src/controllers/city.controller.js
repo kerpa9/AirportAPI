@@ -66,13 +66,8 @@ export const updateCity = async (req, res) => {
 
 export const deleteCity = async (req, res) => {
   try {
-    const { id } = req.params;
-    const city = await cityService.findOneCity(id);
-    if (!city)
-      return res.status(404).json({
-        status: "Error",
-        message: `City with id: ${id} not found`,
-      });
+    const { city } = req;
+
     await cityService.deleteCity(city);
     return res.status(204);
   } catch (error) {

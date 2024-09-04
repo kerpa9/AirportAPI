@@ -12,9 +12,9 @@ import {
 import { validateExistCity } from "../middlewares/city.middlewares.js";
 
 //Roots
-router.route("/city").post(CreateCity).get(findAllCities);
+router.route("/").post(CreateCity).get(findAllCities);
 router
-  .route("/city/:id")
+  .route("/:id")
   .get(validateExistCity, findOneCity)
   .patch(updateCity)
-  .delete(deleteCity);
+  .delete(validateExistCity, deleteCity);

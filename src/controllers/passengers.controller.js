@@ -4,6 +4,7 @@ import {
   validatePartialPassenger,
   validatePassenger,
 } from "../schema/schema.passenger.js";
+import { AppError } from "../errors/appError.js";
 
 const passengerService = new PassengerService();
 
@@ -35,15 +36,13 @@ export const findAllPassengers = async (req, res) => {
   }
 };
 
-export const findOnePassenger = async (req, res) => {
+export const findOnePassenger = async (req, res, next) => {
   const { id } = req.params;
   try {
     const passenger = await passengerService.findOnePassenger(id);
     if (!passenger)
-      return res.status(404).json({
-        status: "Error",
-        message: `Passenger with id: ${id} not found`,
-      });
+      return next(new AppError(`Passenger with id: ${id} not found`, 404));
+
     return res.status(200).json(passenger);
   } catch (err) {
     return res.status(500).json(err);
