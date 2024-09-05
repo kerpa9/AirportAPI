@@ -4,95 +4,74 @@ import {
   validatePartialPassenger,
   validatePassenger,
 } from "../schema/schema.passenger.js";
-import { AppError } from "../errors/appError.js";
+import { AppError, catchError } from "../errors/index.js";
 
 const passengerService = new PassengerService();
 
-export const CreatePassenger = async (req, res) => {
-  try {
-    const { hasError, errorMessage, dataValidate } = validatePassenger(
-      req.body
-    );
+export const CreatePassenger = catchError(async (req, res, next) => {
+  const { hasError, errorMessage, dataValidate } = validatePassenger(req.body);
 
-    if (hasError)
-      return res.status(422).json({
-        status: "error",
-        message: errorMessage,
-      });
+  if (hasError)
+    return res.status(422).json({
+      status: "error",
+      message: errorMessage,
+    });
 
-    const passenger = await passengerService.createPassenger(dataValidate);
-    return res.status(201).json(passenger);
-  } catch (err) {
-    return res.status(500).json(err);
-  }
-};
+  const passenger = await passengerService.createPassenger(dataValidate);
+  return res.status(201).json(passenger);
+});
 
-export const findAllPassengers = async (req, res) => {
-  try {
-    const passengers = await passengerService.findAllPassengers();
-    return res.status(200).json(passengers);
-  } catch (err) {
-    return res.status(500).json(err);
-  }
-};
+export const findAllPassengers = catchError(async (req, res, next) => {
+  const passengers = await passengerService.findAllPassengers();
+  return res.status(200).json(passengers);
+});
 
-export const findOnePassenger = async (req, res, next) => {
+export const findOnePassenger = catchError(async (req, res, next) => {
   const { id } = req.params;
-  try {
-    const passenger = await passengerService.findOnePassenger(id);
-    if (!passenger)
-      return next(new AppError(`Passenger with id: ${id} not found`, 404));
 
-    return res.status(200).json(passenger);
-  } catch (err) {
-    return res.status(500).json(err);
-  }
-};
+  const passenger = await passengerService.findOnePassenger(id);
+  if (!passenger)
+    return next(new AppError(`Passenger with id: ${id} not found`, 404));
 
-export const UpdatePassenger = async (req, res) => {
-  try {
-    const { hasError, errorMessage, dataValidate } = validatePartialPassenger(
-      req.body
-    );
+  return res.status(200).json(passenger);
+});
 
-    if (hasError)
-      return res.status(422).json({
-        status: "error",
-        message: errorMessage,
-      });
-    const { id } = req.params;
+export const UpdatePassenger = catchError(async (req, res) => {
+  const { hasError, errorMessage, dataValidate } = validatePartialPassenger(
+    req.body
+  );
 
-    const passenger = await passengerService.findOnePassenger(id);
+  if (hasError)
+    return res.status(422).json({
+      status: "error",
+      message: errorMessage,
+    });
+  const { id } = req.params;
 
-    if (!passenger)
-      return res.status(404).json({
-        status: "Error",
-        message: `Passenger with id: ${id} not found`,
-      });
-    const updatePassenger = await passengerService.updatePassenger(
-      passenger,
-      dataValidate
-    );
-    return res.status(200).json(updatePassenger);
-  } catch (err) {
-    return res.status(500).json(err);
-  }
-};
+  const passenger = await passengerService.findOnePassenger(id);
 
-export const DeletePassenger = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const passenger = await passengerService.findOnePassenger(id);
+  if (!passenger)
+    return res.status(404).json({
+      status: "Error",
+      message: `Passenger with id: ${id} not found`,
+    });
+  const updatePassenger = await passengerService.updatePassenger(
+    passenger,
+    dataValidate
+  );
+  return res.status(200).json(updatePassenger);
+});
 
-    if (!passenger) {
-      return res.status(404).json({
-        status: "Error",
-        message: `Passenger with id: ${id} not found`,
-      });
-    }
-    await passengerService.deletePassenger(passenger);
-    return res.status(204);
-  } catch (error) {
-    return res.status(500).json(err);
-  }
-};
+export const DeletePassenger = catchError(async (req, res, next) => {
+  const { id } = req.params;
+  const passenger = await passengerService.findOnePassenger(id);
+
+  if (!passenger)
+    return res.status(404).json({
+      status: "Error",
+      message: `Passenger with id: ${id} not found`,
+    });
+
+  await passengerService.deletePassenger(passenger);
+  return res.status(204);
+});
