@@ -23,6 +23,8 @@ export const CreatePassenger = catchError(async (req, res, next) => {
 
 export const findAllPassengers = catchError(async (req, res, next) => {
   const passengers = await passengerService.findAllPassengers();
+  // throw new Error("Error🔐✖️🤷‍♂️");
+
   return res.status(200).json(passengers);
 });
 

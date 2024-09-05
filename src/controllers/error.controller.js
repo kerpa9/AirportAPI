@@ -1,4 +1,12 @@
 import { envs } from "../config/enviroments/enviroments.js";
+import { AppError } from "../errors/appError.js";
+import { Error } from "../models/error.model.js";
+
+const handleCastError22001 = (err, res) =>
+  new AppError("Value too long for type on attribute in database", 400);
+
+const handleCastError23505 = (err, res) =>
+  new AppError("Duplicate field value: please use another value", 400);
 
 const sendErrorDev = (err, res) => {
   res.status(err.statusCode).json({
@@ -10,6 +18,11 @@ const sendErrorDev = (err, res) => {
 };
 
 const sendErrorProd = async (err, res) => {
+  await Error.create({
+    status: err.status,
+    message: err.message,
+    stack: err.stack,
+  });
   if (err.isOperational) {
     // operational, trusted error: send message to client
     res.status(err.statusCode).json({
@@ -25,6 +38,7 @@ const sendErrorProd = async (err, res) => {
     });
   }
 };
+
 export const globalErrorHandle = (err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
 
@@ -35,11 +49,12 @@ export const globalErrorHandle = (err, req, res, next) => {
   }
 
   if (envs.NODE_ENV === "production") {
-    sendErrorProd(err, res);
-  }
+    // console.log(envs.NODE_ENV);
+    let error = err;
 
-  res.status(err.statusCode).json({
-    status: err.status,
-    message: err.message,
-  });
+    if (err.parent?.code === "22001") error = handleCastError22001();
+    if (err.parent?.code === "23505") error = handleCastError23505();
+
+    sendErrorProd(error, res);
+  }
 };
